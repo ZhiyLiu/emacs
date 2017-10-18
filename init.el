@@ -101,7 +101,7 @@
   ;; init-evil dependent on init-clipboard
   (require 'init-clipboard)
   ;; use evil mode (vi key binding)
-  (require 'init-evil)
+  ;;(require 'init-evil)
   (require 'init-multiple-cursors)
   (require 'init-sh)
   (require 'init-ctags)
@@ -117,6 +117,14 @@
   ;; need statistics of keyfreq asap
   (require 'init-keyfreq)
   (require 'init-httpd)
+
+  ;; default size
+  (add-to-list 'default-frame-alist '(height . 65))
+  (add-to-list 'default-frame-alist '(width . 125))
+  ;; package management
+  ;;(require 'package)
+  ;;(add-to-list 'package-archives
+  ;;             '("melpa-stable" . "http://stable.melpa.org/packages/") t)
 
   ;; projectile costs 7% startup time
 
