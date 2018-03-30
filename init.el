@@ -80,6 +80,7 @@
   (require 'init-windows)
   (require 'init-sessions)
   (require 'init-git)
+
   (require 'init-markdown)
   (require 'init-erlang)
   (require 'init-javascript)
@@ -113,51 +114,88 @@
   (require 'init-web-mode)
   (require 'init-slime)
   (require 'init-company)
-  (require 'init-chinese-pyim) ;; cannot be idle-required
+  ;;(Require 'init-chinese-pyim) ;; cannot be idle-required
   ;; need statistics of keyfreq asap
-  (require 'init-keyfreq)
+;;  (require 'init-keyfreq)
   (require 'init-httpd)
 
   ;; default size
-  (add-to-list 'default-frame-alist '(height . 65))
-  (add-to-list 'default-frame-alist '(width . 125))
-  ;; package management
-  ;;(require 'package)
-  ;;(add-to-list 'package-archives
-  ;;             '("melpa-stable" . "http://stable.melpa.org/packages/") t)
+  (custom-set-variables
+ '(initial-frame-alist (quote ((fullscreen . maximized)))))
+  ;;default coding
+   (setq utf-translate-cjk-mode nil) ; disable CJK coding/encoding (Chinese/Japanese/Korean characters)
+  (set-language-environment 'utf-8)
+  (set-keyboard-coding-system 'utf-8-mac) ; For old Carbon emacs on OS X only
+  (setq locale-coding-system 'utf-8)
+  (set-default-coding-systems 'utf-8)
+  (set-terminal-coding-system 'utf-8)
+  (unless (eq system-type 'windows-nt)
+   (set-selection-coding-system 'utf-8))
+  (prefer-coding-system 'utf-8)
+  ;;cppcm
+(setq cppcm-get-executable-full-path-callback
+      (lambda (path type tgt-name)
+        ;; path is the supposed-to-be target's full path
+        ;; type is either add_executabe or add_library
+        ;; tgt-name is the target to built. The target's file extension is stripped
+        (message "cppcm-get-executable-full-path-callback called => %s %s %s" path type tgt-name)
+        (let* ((dir (file-name-directory path))
+               (file (file-name-nondirectory path)))
+          (cond
+           ((string= type "add_executable")
+            (setq path (concat dir "bin/" file)))
+           ;; for add_library
+           (t (setq path (concat dir "lib/" file)))
+           ))
+        ;; return the new path
+        (message "cppcm-get-executable-full-path-callback called => path=%s" path)
+        path))
+(setq cppcm-write-flymake-makefile nil)
+;;cscope
+(require 'xcscope)
+(cscope-setup)
+(define-key global-map [(f12)] 'cscope-find-this-symbol)
 
-  ;; projectile costs 7% startup time
+(define-key global-map [(f6)] 'cscope-find-functions-calling-this-function)
+(define-key global-map [(f11)]  'cscope-history-forward-line)
+;;(define-key global-map [(f10)] 'cscope-history-forward-file)
+(define-key global-map [(shift f11)] 'cscope-history-backward-line)
+;;(define-key global-map [(control f10)] 'cscope-history-backward-file)
+;;(define-key global-map [(f7)] 'cmake-project-configure-project)
+;; misc has some crucial tools I need immediately
+(require 'init-misc)
 
-  ;; misc has some crucial tools I need immediately
-  (require 'init-misc)
+;; comment below line if you want to setup color theme in your own way
+;;(if (or (display-graphic-p) (string-match-p "256color"(getenv "TERM"))) (require 'init-color-theme))
+(load-theme 'zenburn t)
 
-  ;; comment below line if you want to setup color theme in your own way
-  (if (or (display-graphic-p) (string-match-p "256color"(getenv "TERM"))) (require 'init-color-theme))
+(require 'init-emacs-w3m)
+(require 'init-hydra)
+;; show the full file path
+(setq frame-title-format
+      (list (format "%s %%S: %%j " (system-name))
+            '(buffer-file-name "%f" (dired-directory dired-directory "%b"))))
+;; {{ idle require other stuff
+(setq idle-require-idle-delay 2)
+(setq idle-require-symbols '(init-perforce
+                             init-misc-lazy
+                             init-which-func
+                             init-fonts
+                             init-hs-minor-mode
+                             init-writting
+                             init-pomodoro
+                             init-artbollocks-mode
+                             init-semantic))
+(idle-require-mode 1) ;; starts loading
+;; }}
 
-  (require 'init-emacs-w3m)
-  (require 'init-hydra)
+(when (require 'time-date nil t)
+  (message "Emacs startup time: %d seconds."
+           (time-to-seconds (time-since emacs-load-start-time))))
 
-  ;; {{ idle require other stuff
-  (setq idle-require-idle-delay 2)
-  (setq idle-require-symbols '(init-perforce
-                               init-misc-lazy
-                               init-which-func
-                               init-fonts
-                               init-hs-minor-mode
-                               init-writting
-                               init-pomodoro
-                               init-artbollocks-mode
-                               init-semantic))
-  (idle-require-mode 1) ;; starts loading
-  ;; }}
-
-  (when (require 'time-date nil t)
-    (message "Emacs startup time: %d seconds."
-             (time-to-seconds (time-since emacs-load-start-time))))
-
-  ;; my personal setup, other major-mode specific setup need it.
-  ;; It's dependent on init-site-lisp.el
-  (if (file-exists-p "~/.custom.el") (load-file "~/.custom.el")))
+;; my personal setup, other major-mode specific setup need it.
+;; It's dependent on init-site-lisp.el
+(if (file-exists-p "~/.custom.el") (load-file "~/.custom.el")))
 
 ;; @see https://www.reddit.com/r/emacs/comments/4q4ixw/how_to_forbid_emacs_to_touch_configuration_files/
 (setq custom-file (concat user-emacs-directory "custom-set-variables.el"))
@@ -168,3 +206,48 @@
 ;;; no-byte-compile: t
 ;;; End:
 (put 'erase-buffer 'disabled nil)
+
+;; indicate plantuml.jar
+(setq plantuml-jar-path "/playpen/software/plantuml/plantuml.jar")
+;; Enable plantuml-mode for PlantUML files
+(add-to-list 'auto-mode-alist '("\\.plantuml\\'" . plantuml-mode))
+
+;; which function
+(add-hook 'c-mode-common-hook 
+  (lambda ()
+    (which-function-mode t)))
+(add-hook 'c++-mode-common-hook 
+  (lambda ()
+    (which-function-mode t)))
+
+;; w3m
+(add-to-list 'exec-path  "/usr/bin/w3m")
+
+;; auto save
+(setq auto-save-interval 500)
+
+;; indent
+(setq c-default-style "linux"
+      c-basic-offset 4)
+
+;; fold-this
+    (global-set-key (kbd "C-c C-F") 'fold-this-all)
+    (global-set-key (kbd "C-c C-f") 'fold-this)
+(global-set-key (kbd "C-c M-f") 'fold-this-unfold-all)
+
+
+;; undo-tree
+(global-undo-tree-mode 1)
+(global-set-key (kbd "C-z") 'undo)
+(global-set-key (kbd "<f7>") 'compile)
+(global-set-key (kbd "<f3>") 'next-error)
+; from enberg on #emacs, hide compile window if succeed
+(setq compilation-finish-function
+  (lambda (buf str)
+    (if (null (string-match ".*exited abnormally.*" str))
+        ;;no errors, make the compilation window go away in a few seconds
+        (progn
+          (run-at-time
+           "2 sec" nil 'delete-windows-on
+           (get-buffer-create "*compilation*"))
+          (message "No Compilation Errors!")))))

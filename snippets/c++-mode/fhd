@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: fhd
+# key: fhd
+# --
+/* The purpose of this class is
+ *
+ * Zhiyuan Liu
+ * `(format-time-string "%Y.%m" (current-time))`
+*/
