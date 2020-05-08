@@ -251,3 +251,8 @@
            "2 sec" nil 'delete-windows-on
            (get-buffer-create "*compilation*"))
           (message "No Compilation Errors!")))))
+
+(setq python-shell-completion-native-enable nil)
+
+(setq visible-bell t)
+(load-file "/home/zhiyuan/.emacs.d/scripts/eshell_customizations.el")
