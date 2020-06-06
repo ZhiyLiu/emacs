@@ -253,6 +253,7 @@
           (message "No Compilation Errors!")))))
 
 (setq python-shell-completion-native-enable nil)
+
 ;; matlab mode-line
 (autoload 'matlab-mode "matlab" "Matlab Editing Mode" t)
 (add-to-list
@@ -260,3 +261,5 @@
       '("\\.m$" . matlab-mode))
 (setq matlab-indent-function t)
 (setq matlab-shell-command "matlab")
+
+(setq visible-bell t)
